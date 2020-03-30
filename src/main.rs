@@ -19,19 +19,25 @@ struct Game {
 impl Game {
     fn init_game(&mut self) {
 
-        for i in 1..2 {
-            self.place_boat(i);
+        for i in 1..6 {
+            self.place_boat(i, 0);
+            self.place_boat(i, 1);
         }
-        
-        // self.place_boat(1);
 
-        self.print_field();
+        self.print_fields();
     }
 
-    fn place_boat(&mut self, ship_id: u32) {
+    fn place_boat(&mut self, ship_id: u32, field_id: u32) {
 
         let ships: [u32; 5] = [5, 4, 3, 3, 2];
         let ship_length: u32 = ships[(ship_id - 1) as usize];
+
+        let mut field: [[u32; 10]; 10] = self.field_1;
+        match field_id {
+            0 => field = self.field_1,
+            1 => field = self.field_2,
+            _ => println!("No such field.")
+        }
 
         let mut placed = false;
         let mut x: u32;
@@ -44,40 +50,54 @@ impl Game {
             y = rand::thread_rng().gen_range(0, 10);
             dir = rand::random();
 
-            println!("x is {}", x);
-            println!("y is {}", y);
-            println!("dir is {}", dir);
-            println!("ship length is {}", ship_length);
-            println!("");
-
-            if dir {
-                if (x <= 10 - ship_length) && (self.field_1[y as usize][x as usize..x as usize + ship_length as usize].iter().sum::<u32>() == 0) {
+            if dir { // horizontal
+                if (x <= 10 - ship_length) && (field[y as usize][x as usize..x as usize + ship_length as usize].iter().sum::<u32>() == 0) {
                     for i in 0..ship_length {
-                        self.field_1[y as usize][(x+i) as usize] = ship_id;
+                        field[y as usize][(x+i) as usize] = ship_id;
                     }
                     placed = true;
                 }
-            } else {
-                if (y <= 10 - ship_length) && (self.field_1[y as usize..y as usize + ship_length as usize][x as usize].iter().sum::<u32>() == 0) {
+            } else { // vertical
+                if y <= 10 - ship_length {
+                    let mut sum :u32 = 0;
                     for i in 0..ship_length {
-                        self.field_1[(y+i) as usize][x as usize] = ship_id;
+                        sum += field[(y+i) as usize][x as usize];
                     }
-                    placed = true;
+                    if sum == 0 {
+                        for i in 0..ship_length {
+                            field[(y+i) as usize][x as usize] = ship_id;
+                        }
+                        placed = true;
+                    }
                 }
             }
+        }
 
+        match field_id {
+            0 => self.field_1 = field,
+            1 => self.field_2 = field,
+            _ => println!("No such field.")
         }
     }
 
-    fn print_field(&self) {
+    fn print_fields(&self) {
         println!();
 
-        for i in self.field_1.iter() {
-            for j in i {
-                if j > &0 {
-                    print!("{}{}{} ", color::Fg(color::Green), j, style::Reset);
+        for i in 0..10 {
+            for j in 0..10 {
+                if self.field_1[i][j] > 0 {
+                    print!("{}{}{} ", color::Fg(color::Green), self.field_1[i][j], style::Reset);
                 } else {
-                    print!("{} ", j);
+                    print!("{} ", self.field_1[i][j]);
+                }
+            }
+            print!("    ");
+
+            for j in 0..10 {
+                if self.field_2[i][j] > 0 {
+                    print!("{}{}{} ", color::Fg(color::Green), self.field_2[i][j], style::Reset);
+                } else {
+                    print!("{} ", self.field_2[i][j]);
                 }
             }
             println!();
