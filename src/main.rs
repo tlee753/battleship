@@ -1,44 +1,77 @@
 use rand::Rng;
 
 fn main() {
-    println!("Let the games begin...");
+    println!("\nLet the games begin...\n");
 
-    let mut field = [[0; 10]; 10];
+    let mut game: Game = Game { field_1: [[0; 10]; 10], field_2: [[0; 10]; 10] };
+    game.init_game();
 
-    let x = rand::thread_rng().gen_range(0, 10);
-    let y = rand::thread_rng().gen_range(0, 10);
-    let dir = rand::thread_rng().gen_range(0, 4);
-
-    println!();
-    println!("x is {}", x + 1);
-    println!("y is {}", y + 1);
-    println!("dir is {}", dir);
-
-    match dir {
-        0 | 1 | 2 | 3 => {
-            if x < 5 {
-                for i in 0..5 {
-                    field[y][x + i] = 1;
-                }
-            } else {
-                field[y][x] = 1;
-            }
-        }
-        _ => {
-            println!("Direction not allowed");
-        }
-    }
-
-    println!();
-    for i in field.iter() {
-        for j in i {
-            print!("{} ", j);
-        }
-        println!();
-    }
-    println!();
-
-    println!("I sunk your battleship!");
+    println!("\nI sunk your battleship!\n");
 }
 
-// fn placeBoat(size-of-boat, boat-id)
+struct Game {
+    field_1: [[i32; 10]; 10],
+    field_2: [[i32; 10]; 10],
+}
+
+impl Game {
+    fn init_game(&mut self) {
+
+        // for i in 1..6 {
+        //     self.place_boat(i);
+        // }
+        
+        self.place_boat(1);
+
+        self.print_field();
+    }
+
+    fn place_boat(&mut self, ship_id: i32) {
+
+        let ships: [i32; 5] = [5, 4, 3, 3, 2];
+        let ship_length: i32 = ships[(ship_id - 1) as usize];
+
+        let mut placed = false;
+        let mut x: i32;
+        let mut y: i32;
+        let mut dir: i32;
+
+        while !placed {
+
+            x = rand::thread_rng().gen_range(0, 10);
+            y = rand::thread_rng().gen_range(0, 10);
+            dir = rand::thread_rng().gen_range(0, 4);
+
+            println!("x is {}", x);
+            println!("y is {}", y);
+            println!("dir is {}", dir);
+
+            match dir {
+                0 | 1 | 2 | 3 => {
+                    if (x <= 10 - ship_length) && (self.field_1[y as usize][x as usize..x as usize + ship_length as usize].iter().sum::<i32>() == 0) {
+                        for i in 0..ship_length {
+                            self.field_1[y as usize][(x+i) as usize] = ship_id;
+                        }
+                        placed = true;
+                    }
+                }
+                _ => {
+                    println!("Direction not found!");
+                }
+            }
+        }
+    }
+
+    fn print_field(&self) {
+        println!();
+
+        for i in self.field_1.iter() {
+            for j in i {
+                print!("{} ", j);
+            }
+            println!();
+        }
+
+        println!();
+    }
+}
