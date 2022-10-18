@@ -1,0 +1,7 @@
+- neural network struct
+  - nodes?
+    - connected to, weights
+- chemical balance
+- governing node spawn structure
+  - optimal localization
+- 3d space weight
